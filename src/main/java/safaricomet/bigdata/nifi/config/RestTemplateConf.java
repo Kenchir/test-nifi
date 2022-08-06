@@ -47,8 +47,8 @@ public  class RestTemplateConf {
             url = resourceUrl +url;
             HttpHeaders headers = new HttpHeaders();
             headers.add(HttpHeaders.AUTHORIZATION, this.bearerToken);
-            headers.add("Set-Cookie",this.cookie);
-            headers.setOrigin("127.0.0.1");
+//            headers.add("Set-Cookie",this.cookie);
+//            headers.setOrigin("127.0.0.1");
             headers.setAccept(Arrays.asList(MediaType.APPLICATION_JSON));
             headers.setContentType(MediaType.APPLICATION_JSON);
 //            headers.add("user-agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/54.0.2840.99 Safari/537.36");
