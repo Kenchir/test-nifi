@@ -59,12 +59,12 @@ public class Status {
         try{
             String param = String.format(this.paramContext,paramId,paramId);
             this.paramContext1 = objectMapper.readValue(param, HashMap.class);;
-            HashMap map=  this.getProcessGroupProcessors(id);
+            Map<String,Object> map=  this.getProcessGroupProcessors(id);
 
             List<Map> list = (List<Map>) map.get("processGroups");
             for (Map group : list){
 
-                Map component = (Map) group.get("component");
+                Map<String ,Object> component = (Map<String, Object>) group.get("component");
                 String groupId =group.get("id").toString();
                 String name = (String) component.get("name");
                 //Process 6D and COLLAB
@@ -81,13 +81,13 @@ public class Status {
         }
 
     }
-    public  HashMap getProcessGroupProcessors(String id) throws IOException {
+    public  Map<String,Object> getProcessGroupProcessors(String id) throws IOException {
         String apiEndpoint =  "/process-groups/"+id +"/process-groups";
-      return (HashMap) restTemplate.get(apiEndpoint);
+      return (Map<String, Object>) restTemplate.get(apiEndpoint);
     }
 
     public  Object updateProcessGroup2(String id) throws IOException {
-        HashMap map= this.getProcessGroupProcessors(id);
+        Map<String, Object> map= this.getProcessGroupProcessors(id);
         List<Map> list = (List<Map>) map.get("processGroups");
 
         list.forEach(map1 ->{
@@ -100,7 +100,7 @@ public class Status {
         return  list;
     }
     public  void updateProcessGroup3(String id) throws IOException {
-        HashMap map= this.getProcessGroupProcessors(id);
+        Map<String, Object> map= this.getProcessGroupProcessors(id);
 
 
         List<Map> list = (List<Map>) map.get("processGroups");

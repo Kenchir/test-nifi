@@ -22,6 +22,7 @@ import javax.jms.Session;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Map;
 
 @Slf4j
 @Component
@@ -80,7 +81,7 @@ public  class RestTemplateConf {
             if (response.getStatusCodeValue() != 200){
                 throw  new RuntimeException(String.valueOf(response.getStatusCode()));
             }
-            return objectMapper.readValue(response.getBody(), HashMap.class);
+            return objectMapper.readValue(response.getBody(), Map.class);
         }catch (Exception e){
             e.printStackTrace();
             return  e.getMessage();
