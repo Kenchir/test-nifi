@@ -58,8 +58,10 @@ public class Status {
 
         try{
             String param = String.format(this.paramContext,paramId,paramId);
-            this.paramContext1 = objectMapper.readValue(param, HashMap.class);;
-            Map<String,Object> map=  this.getProcessGroupProcessors(id);
+            this.paramContext1 = objectMapper.readValue(param, HashMap.class);
+            String token = restTemplate.getBearerToken1();
+            Map<String,Object> map=  this.getProcessGroupProcessors(id,token);
+
 
             List<Map> list = (List<Map>) map.get("processGroups");
             for (Map group : list){
@@ -69,9 +71,9 @@ public class Status {
                 String name = (String) component.get("name");
                 //Process 6D and COLLAB
                 if (name.equals("COLLAB") || name.equals("NCC")){
-                      this.updateProcessGroup2(groupId);
+                      this.updateProcessGroup2(groupId,token);
                 }else {
-                    this.updateProcessGroup3(groupId);
+                    this.updateProcessGroup3(groupId,token);
                 }
             }
             return list;
@@ -81,39 +83,39 @@ public class Status {
         }
 
     }
-    public  Map<String,Object> getProcessGroupProcessors(String id) throws IOException {
+    public  Map<String,Object> getProcessGroupProcessors(String id,String token) throws IOException {
         String apiEndpoint =  "/process-groups/"+id +"/process-groups";
-      return (Map<String, Object>) restTemplate.get(apiEndpoint);
+      return (Map<String, Object>) restTemplate.get(apiEndpoint, token);
     }
 
-    public  Object updateProcessGroup2(String id) throws IOException {
-        Map<String, Object> map= this.getProcessGroupProcessors(id);
+    public  Object updateProcessGroup2(String id,String token) throws IOException {
+        Map<String, Object> map= this.getProcessGroupProcessors(id,token);
         List<Map> list = (List<Map>) map.get("processGroups");
 
         list.forEach(map1 ->{
              HashMap component = (HashMap) map1.get("component");
              component.put("parameterContext",this.paramContext1);
              map1.put("component",component);
-            Object a = this.putRequest(map1.get("id").toString(),map1);
+            Object a = this.putRequest(map1.get("id").toString(),map1,token);
             log.debug(a.toString());
         });
         return  list;
     }
-    public  void updateProcessGroup3(String id) throws IOException {
-        Map<String, Object> map= this.getProcessGroupProcessors(id);
+    public  void updateProcessGroup3(String id,String token) throws IOException {
+        Map<String, Object> map= this.getProcessGroupProcessors(id,token);
 
 
         List<Map> list = (List<Map>) map.get("processGroups");
         for (Map group : list){
 //            log.info("{}",group);
             String idN =group.get("id").toString();
-            this.updateProcessGroup2(idN);
+            this.updateProcessGroup2(idN,token);
         }
     }
 
-    public  Object putRequest(String id, Object body){
-        String endpoint ="/process-groups/" + id;
-            return restTemplate.putReq(endpoint,body);
+    public  Object putRequest(String id, Object body,String token){
+             String endpoint ="/process-groups/" + id;
+            return restTemplate.putReq(endpoint,body,token);
     }
 
 }

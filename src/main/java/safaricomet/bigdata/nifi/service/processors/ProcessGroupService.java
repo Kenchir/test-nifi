@@ -18,13 +18,14 @@ public class ProcessGroupService {
     RestTemplateConf restTemplateConf;
 
     public List<Map> getProcessorIdAndVersion(String type,String id) throws Exception {
+        String token = restTemplateConf.getBearerToken1();
         List<Map> processorIds = new ArrayList<>();
-        List<Map> processGroups = this.getProcessGroupsWithFetchAndList(id);
+        List<Map> processGroups = this.getProcessGroupsWithFetchAndList(id,token);
 
         processGroups.parallelStream().forEach(each -> {
             List<Map> proc = null;
             try {
-                proc = this.getAllProcessorIds(each.get("id").toString(), type);
+                proc = this.getAllProcessorIds(each.get("id").toString(), type,token);
 
                 processorIds.addAll(proc);
             } catch (JsonProcessingException e) {
@@ -36,9 +37,10 @@ public class ProcessGroupService {
     }
 
     public  Object getQueueCount(String id) throws  Exception{
+        String token = restTemplateConf.getBearerToken1();
         HashMap<String, AtomicInteger> totalcount = new HashMap<>();
         AtomicInteger totalQueuedCount = new AtomicInteger();
-        List<Map> processGroups = this.getProcessGroupsWithFetchAndList(id);
+        List<Map> processGroups = this.getProcessGroupsWithFetchAndList(id,token);
 
         processGroups.parallelStream().forEach(group->{
             HashMap status = (HashMap) group.get("status");
@@ -50,8 +52,8 @@ public class ProcessGroupService {
         return  totalcount;
     }
 
-    public List<Map> getProcessGroupsWithFetchAndList(String id) throws Exception {
-        HashMap map = (HashMap) this.getProcessGroups(id);
+    public List<Map> getProcessGroupsWithFetchAndList(String id,String token) throws Exception {
+        HashMap map = (HashMap) this.getProcessGroups(id,token);
         List<Map> processorGroups = new ArrayList<>();
         List<Map> list = (List<Map>) map.get("processGroups");
 
@@ -61,7 +63,7 @@ public class ProcessGroupService {
             if (name.equals("COLLAB") || name.equals("NCC") || name.equals("CONTROL_FILES")) {
                 HashMap groups = null;
                 try {
-                    groups = (HashMap) this.getProcessGroups(group.get("id").toString());
+                    groups = (HashMap) this.getProcessGroups(group.get("id").toString(),token);
                     List<Map> processGroups = (List<Map>) groups.get("processGroups");
                     processorGroups.addAll(processGroups);
                 } catch (JsonProcessingException e) {
@@ -70,12 +72,12 @@ public class ProcessGroupService {
             } else {
                 HashMap groups = null;
                 try {
-                    groups = (HashMap) this.getProcessGroups(group.get("id").toString());
+                    groups = (HashMap) this.getProcessGroups(group.get("id").toString(),token);
                     List<Map> processGroups = (List<Map>) groups.get("processGroups");
                     processGroups.parallelStream().forEach(each->{
                         HashMap groups1 = null;
                         try {
-                            groups1 = (HashMap) this.getProcessGroups(each.get("id").toString());
+                            groups1 = (HashMap) this.getProcessGroups(each.get("id").toString(),token);
                             List<Map> processGroups1 = (List<Map>) groups1.get("processGroups");
                             processorGroups.addAll(processGroups1);
                         } catch (JsonProcessingException e) {
@@ -90,9 +92,9 @@ public class ProcessGroupService {
         return processorGroups;
     }
 
-    public List<Map> getAllProcessorIds(String id, String type) throws JsonProcessingException {
+    public List<Map> getAllProcessorIds(String id, String type,String token) throws JsonProcessingException {
         List<Map> processorIds = new ArrayList<>();
-        HashMap processors = (HashMap) this.getProcessors(id);
+        HashMap processors = (HashMap) this.getProcessors(id,token);
 
         List<Map> list = (List<Map>) processors.get("processors");
 
@@ -110,14 +112,14 @@ public class ProcessGroupService {
     }
 
 
-    public Object getProcessors(String id) throws JsonProcessingException {
+    public Object getProcessors(String id,String token) throws JsonProcessingException {
         String apiEndpoint = "/process-groups/" + id + "/processors";
-        return restTemplateConf.get(apiEndpoint);
+        return restTemplateConf.get(apiEndpoint,token);
     }
 
-    public Object getProcessGroups(String id) throws JsonProcessingException {
+    public Object getProcessGroups(String id,String token) throws JsonProcessingException {
         String apiEndpoint = "/process-groups/" + id + "/process-groups";
-        return restTemplateConf.get(apiEndpoint);
+        return restTemplateConf.get(apiEndpoint,token);
     }
 
 

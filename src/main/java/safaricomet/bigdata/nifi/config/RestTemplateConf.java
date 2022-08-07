@@ -42,13 +42,13 @@ public  class RestTemplateConf {
 
     volatile String bearerToken;
 
-    public String putReq(String url, Object body){
+    public String putReq(String url, Object body,String token){
         try {
             String apiEndpoint = resourceUrl + url;
             HttpHeaders headers = new HttpHeaders();
             headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
             headers.setContentType(MediaType.APPLICATION_JSON);
-            headers.setBearerAuth(this.bearerToken);
+            headers.setBearerAuth(token);
             HttpEntity<Object> requestEntity = new HttpEntity<>(body, headers);
             log.info("URL: {}",apiEndpoint);
 
@@ -68,17 +68,17 @@ public  class RestTemplateConf {
 
 
 
-    public  Object get(String url) throws JsonProcessingException {
+    public  Object get(String url,String token) throws JsonProcessingException {
         try {
             String apiEndpoint = resourceUrl + url;
             HttpHeaders headers = new HttpHeaders();
             headers.add(HttpHeaders.ACCEPT,"*/*");
-            headers.setBearerAuth(this.bearerToken);
+            headers.setBearerAuth(token);
             HttpEntity<Object> requestEntity = new HttpEntity<>(headers);
             ResponseEntity<String> response = restTemplate.exchange(apiEndpoint,HttpMethod.GET,requestEntity,String.class);
             log.info("Status: {}",response.getHeaders());
             log.info("Body:\n{}",response.getBody());
-            if (response.getStatusCodeValue() != 200){
+            if (response.getStatusCodeValue() > 299){
                 throw  new RuntimeException(String.valueOf(response.getStatusCode()));
             }
             return objectMapper.readValue(response.getBody(), Map.class);
@@ -100,5 +100,17 @@ public  class RestTemplateConf {
         log.info("Req headers: {}",requestEntity.getHeaders());
         HttpEntity<String> response= restTemplate.exchange(apiEndpoint, HttpMethod.POST, requestEntity,String.class);
         this.bearerToken =response.getBody();
+    }
+
+    public  String getBearerToken1(){
+        String apiEndpoint = resourceUrl + "/access/token";
+        HttpHeaders headers = new HttpHeaders();
+
+        headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+        String body= String.format("username=%s&password=%s",username,password );
+        HttpEntity<Object> requestEntity = new HttpEntity<>(body, headers);
+//        log.info("Req headers: {}",requestEntity.getHeaders());
+        HttpEntity<String> response= restTemplate.exchange(apiEndpoint, HttpMethod.POST, requestEntity,String.class);
+        return  response.getBody();
     }
 }

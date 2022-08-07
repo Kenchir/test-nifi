@@ -26,7 +26,8 @@ public class ListSftp {
 
     public  Object updateListSftpAndFetchSftp(String rootId){
         try{
-            HashMap map= (HashMap) this.getProcessGroups(rootId);
+            String token = restTemplate.getBearerToken1();
+            HashMap map= (HashMap) this.getProcessGroups(rootId,token);
 
             List<Map> list = (List<Map>) map.get("processGroups");
             list.parallelStream().forEach(group->{
@@ -35,10 +36,10 @@ public class ListSftp {
                 String id =group.get("id").toString();
                 String name = (String) component.get("name");
                 if (name.equals("COLLAB") || name.equals("NCC")){
-                      this.updateProcessGroup2(id);
+                      this.updateProcessGroup2(id,token);
                 }else {
                     try {
-                        this.updateProcessGroup3(id);
+                        this.updateProcessGroup3(id,token);
                     } catch (IOException e) {
                         throw new RuntimeException(e);
                     }
@@ -52,36 +53,36 @@ public class ListSftp {
     }
 
 
-    public  Object getProcessGroups(String id) throws IOException {
+    public  Object getProcessGroups(String id,String token) throws IOException {
         String apiEndpoint =  "/process-groups/"+id +"/process-groups";
-       return restTemplate.get(apiEndpoint);
+       return restTemplate.get(apiEndpoint,token);
     }
 
-    public  Object getProcessors(String id) {
+    public  Object getProcessors(String id,String token) {
 
             String apiEndpoint =  "/process-groups/"+ id +"/processors";
         try {
-            return restTemplate.get(apiEndpoint);
+            return restTemplate.get(apiEndpoint,token);
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }
     }
 
 
-    public  void updateProcessor(String id, Object body){
+    public  void updateProcessor(String id, Object body,String token){
             String endpoint = "/processors/" + id;
-            restTemplate.putReq(endpoint,body);
+            restTemplate.putReq(endpoint,body,token);
 
     }
 
-    public  Object updateProcessGroup2(String id)  {
+    public  Object updateProcessGroup2(String id,String token)  {
         try {
-            HashMap map= (HashMap) this.getProcessGroups(id);
+            HashMap map= (HashMap) this.getProcessGroups(id,token);
 //        List<Object> processors = new ArrayList<>();
             List<Map> list = (List<Map>) map.get("processGroups");
 
             list.parallelStream().forEach(processGroup->{
-                HashMap myProcessors= (HashMap) this.getProcessors(processGroup.get("id").toString());
+                HashMap myProcessors= (HashMap) this.getProcessors(processGroup.get("id").toString(),token);
 
                 List<Map> processors= (List<Map>) myProcessors.get("processors");
                 processors.parallelStream().forEach(processor ->{
@@ -89,14 +90,14 @@ public class ListSftp {
                     if (map1.get("name").equals("ListSFTP")) {
                         map1.put("config", getListSFTPReplacementObject((HashMap) map1.get("config")));
                         processor.put("component",map1);
-                        this.updateProcessor((String) map1.get("id"),processor);
+                        this.updateProcessor((String) map1.get("id"),processor,token);
                     } else if (map1.get("name").equals("FetchSFTP")) {
                         HashMap conf = (HashMap) getFetchSFTPReplacementObject((HashMap) map1.get("config"));
 
                         map1.put("config", conf);
                         processor.put("component",map1);
                         log.info(processor.toString());
-                        this.updateProcessor((String) map1.get("id"),processor);
+                        this.updateProcessor((String) map1.get("id"),processor,token);
                     }
                 });
 
@@ -108,14 +109,14 @@ public class ListSftp {
         return  null;
     }
 
-    public  void updateProcessGroup3(String id) throws IOException {
-        HashMap map= (HashMap) this.getProcessGroups(id);
+    public  void updateProcessGroup3(String id,String token) throws IOException {
+        HashMap map= (HashMap) this.getProcessGroups(id,token);
 
 
         List<Map> list = (List<Map>) map.get("processGroups");
 
         for (Map group : list){
-            this.updateProcessGroup2(group.get("id").toString());
+            this.updateProcessGroup2(group.get("id").toString(),token);
         }
     }
 

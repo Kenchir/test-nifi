@@ -19,8 +19,8 @@ public class Checker {
 
 
     public Object isPrimaryRunning() throws JsonProcessingException {
-        log.info("Called");
-       Object responseEntity = restTemplate.get("/system-diagnostics");
+        String token = restTemplate.getBearerToken1();
+       Object responseEntity = restTemplate.get("/system-diagnostics",token);
 //        log.info("Status: {}",responseEntity.getStatusCodeValue());
         return  responseEntity;
 

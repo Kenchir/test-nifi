@@ -35,12 +35,13 @@ public class ProcessorService {
             "}";
 
     public Object stopProcessors(String type,String id){
+        String token = restTemplateConf.getBearerToken1();
         try {
             List<Map> list = new ArrayList<>();
             list = processGroupService.getProcessorIdAndVersion(type,id);
             list.parallelStream().forEach(each ->{
 //                log.info("id: {}, Version: {}",each.get("id"), each.get("version"));
-                this.updateProcessor((String) each.get("id"), (String) each.get("version"),"STOPPED");
+                this.updateProcessor((String) each.get("id"), (String) each.get("version"),"STOPPED",token);
             });
             return true;
         }
@@ -50,10 +51,11 @@ public class ProcessorService {
         return  false;
     }
     public Object startProcessors(String type,String id){
+        String token = restTemplateConf.getBearerToken1();
         try {
             List<Map> list = processGroupService.getProcessorIdAndVersion(type,id);
             list.parallelStream().forEach(each ->{
-                this.updateProcessor((String) each.get("id"), (String) each.get("version"),"RUNNING");
+                this.updateProcessor((String) each.get("id"), (String) each.get("version"),"RUNNING",token);
             });
             return true;
         }
@@ -63,11 +65,11 @@ public class ProcessorService {
         return  false;
     }
 
-    public  void  updateProcessor(String id, String revision,String state){
+    public  void  updateProcessor(String id, String revision,String state,String token){
         String endpoint =  "/processors/" + id + "/run-status";
 
         String newBody=String.format(updateBody, revision,state);
-        restTemplateConf.putReq(endpoint,newBody);
+        restTemplateConf.putReq(endpoint,newBody,token);
     }
 
 
