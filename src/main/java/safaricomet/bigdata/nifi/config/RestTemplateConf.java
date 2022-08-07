@@ -14,10 +14,13 @@ import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 
 import javax.jms.Session;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 
 @Slf4j
@@ -36,63 +39,65 @@ public  class RestTemplateConf {
     @Autowired
     RestTemplate restTemplate;
 
-    private  String cookie;
-    private String bearerToken;
-
+    volatile String bearerToken;
 
     public String putReq(String url, Object body){
         try {
-
-//            log.info("Body {}",body);
-            url = resourceUrl +url;
+            String apiEndpoint = resourceUrl + url;
             HttpHeaders headers = new HttpHeaders();
-            headers.add(HttpHeaders.AUTHORIZATION, this.bearerToken);
-//            headers.add("Set-Cookie",this.cookie);
-//            headers.setOrigin("127.0.0.1");
-            headers.setAccept(Arrays.asList(MediaType.APPLICATION_JSON));
+            headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
             headers.setContentType(MediaType.APPLICATION_JSON);
-//            headers.add("user-agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/54.0.2840.99 Safari/537.36");
+            headers.setBearerAuth(this.bearerToken);
+            HttpEntity<Object> requestEntity = new HttpEntity<>(body, headers);
+            log.info("URL: {}",apiEndpoint);
 
-            ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
-            HttpEntity<Object> requestEntity = new HttpEntity<Object>(body, headers);
-//            log.info("Req entity: {}",requestEntity);
-             restTemplate.put(url,  requestEntity);
-//            return  response.getBody();
-            return  "test";
+            ResponseEntity<String> response= restTemplate.exchange(apiEndpoint,HttpMethod.PUT,requestEntity,String.class);
+            log.info("Status: {}",response.getHeaders());
+            log.info("Body:\n{}",response.getBody());
+            if (response.getStatusCodeValue() != 200){
+                throw  new RuntimeException(String.valueOf(response.getStatusCode()));
+            }
+            return  response.getBody();
+
         }catch (Exception e){
-
-//            log.error("Error: {}",e.getMessage());
             e.printStackTrace();
             return  e.getMessage();
         }
     }
 
 
+
     public  Object get(String url) throws JsonProcessingException {
-        String apiEndpoint = resourceUrl + url;
-        HttpHeaders headers = new HttpHeaders();
-        headers.add(HttpHeaders.AUTHORIZATION,this.bearerToken);
-        HttpEntity<Object> requestEntity = new HttpEntity<>(headers);
-        ResponseEntity<String> response = restTemplate.exchange(apiEndpoint,HttpMethod.GET,requestEntity,String.class);
-        return objectMapper.readValue(response.getBody(), HashMap.class);
+        try {
+            String apiEndpoint = resourceUrl + url;
+            HttpHeaders headers = new HttpHeaders();
+            headers.add(HttpHeaders.ACCEPT,"*/*");
+            headers.setBearerAuth(this.bearerToken);
+            HttpEntity<Object> requestEntity = new HttpEntity<>(headers);
+            ResponseEntity<String> response = restTemplate.exchange(apiEndpoint,HttpMethod.GET,requestEntity,String.class);
+            log.info("Status: {}",response.getHeaders());
+            log.info("Body:\n{}",response.getBody());
+            if (response.getStatusCodeValue() != 200){
+                throw  new RuntimeException(String.valueOf(response.getStatusCode()));
+            }
+            return objectMapper.readValue(response.getBody(), HashMap.class);
+        }catch (Exception e){
+            e.printStackTrace();
+            return  e.getMessage();
+        }
+
     }
 
     @Scheduled(fixedDelay = 1000 * 60 * 60 * 12, initialDelay = 0)
     public  void getBearerToken(){
-        log.info("username: {}, password: {}",username,password);
         String apiEndpoint = resourceUrl + "/access/token";
         HttpHeaders headers = new HttpHeaders();
 
         headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
         String body= String.format("username=%s&password=%s",username,password );
-        log.info("body:{}",body);
         HttpEntity<Object> requestEntity = new HttpEntity<>(body, headers);
         log.info("Req headers: {}",requestEntity.getHeaders());
         HttpEntity<String> response= restTemplate.exchange(apiEndpoint, HttpMethod.POST, requestEntity,String.class);
-        this.bearerToken ="Bearer "+ response.getBody();
-
-        log.info(" Bearer Token: {}", bearerToken);
-        log.info("Cookie :{}",response.getHeaders());
-//        this.cookie=response.getHeaders().get("Set-Cookie");
+        this.bearerToken =response.getBody();
     }
 }

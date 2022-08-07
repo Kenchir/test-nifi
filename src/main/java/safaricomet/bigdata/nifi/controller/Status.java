@@ -58,8 +58,8 @@ public class Status {
 
         try{
             String param = String.format(this.paramContext,paramId,paramId);
-            this.paramContext1 = (HashMap) objectMapper.readValue(param, HashMap.class);;
-            HashMap map= (HashMap) this.getProcessGroupProcessors(id);
+            this.paramContext1 = objectMapper.readValue(param, HashMap.class);;
+            HashMap map=  this.getProcessGroupProcessors(id);
 
             List<Map> list = (List<Map>) map.get("processGroups");
             for (Map group : list){
@@ -81,13 +81,13 @@ public class Status {
         }
 
     }
-    public  Object getProcessGroupProcessors(String id) throws IOException {
+    public  HashMap getProcessGroupProcessors(String id) throws IOException {
         String apiEndpoint =  "/process-groups/"+id +"/process-groups";
-      return  restTemplate.get(apiEndpoint);
+      return (HashMap) restTemplate.get(apiEndpoint);
     }
 
     public  Object updateProcessGroup2(String id) throws IOException {
-        HashMap map= (HashMap) this.getProcessGroupProcessors(id);
+        HashMap map= this.getProcessGroupProcessors(id);
         List<Map> list = (List<Map>) map.get("processGroups");
 
         list.forEach(map1 ->{
@@ -100,7 +100,7 @@ public class Status {
         return  list;
     }
     public  void updateProcessGroup3(String id) throws IOException {
-        HashMap map= (HashMap) this.getProcessGroupProcessors(id);
+        HashMap map= this.getProcessGroupProcessors(id);
 
 
         List<Map> list = (List<Map>) map.get("processGroups");
