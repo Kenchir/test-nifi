@@ -47,20 +47,19 @@ public class ContextParamService {
             "  }\n" +
             "}";
     public Object updateParamContext(String state,String id) throws JsonProcessingException {
-        String token = restTemplateConf.getBearerToken1();
         String body=null;
-        String version=this.getParamContextPrevVersion(id,token);
+        String version=this.getParamContextPrevVersion(id);
         log.info("version: {}, state: {}",version,state);
         if(Objects.equals(state, "primary")){
             body = String.format(template,version,id,secondary,primary,id);
         }else {
             body = String.format(template,version,id,backup,secondary,id);
         }
-       return restTemplateConf.putReq("/parameter-contexts/"+id,body,token);
+       return restTemplateConf.putReq("/parameter-contexts/"+id,body);
     }
 
-    public  String getParamContextPrevVersion(String id,String token) throws JsonProcessingException {
-        HashMap obj = (HashMap) restTemplateConf.get("/parameter-contexts/"+id,token);
+    public  String getParamContextPrevVersion(String id) throws JsonProcessingException {
+        HashMap obj = (HashMap) restTemplateConf.get("/parameter-contexts/"+id);
         HashMap<String,String> revision = (HashMap) obj.get("revision");
         return String.valueOf(revision.get("version"));
     }
