@@ -40,7 +40,7 @@ public  class RestTemplateConf {
     @Autowired
     RestTemplate restTemplate;
 
-    volatile String bearerToken;
+     String bearerToken = "eyJraWQiOiIzNjI1ZTMyZi1kMjI0LTQwMzEtYmEzOS02NzU2OTVhNGY0MmEiLCJhbGciOiJQUzUxMiJ9.eyJzdWIiOiJLZW5uZXRoLVRlY2hNIiwiYXVkIjoiTGRhcFByb3ZpZGVyIiwibmJmIjoxNjU5ODk3MjY1LCJpc3MiOiJMZGFwUHJvdmlkZXIiLCJwcmVmZXJyZWRfdXNlcm5hbWUiOiJLZW5uZXRoLVRlY2hNIiwiZXhwIjoxNjU5OTQwNDY1LCJpYXQiOjE2NTk4OTcyNjUsImp0aSI6IjMxNjAyMWFhLTMxZDktNGU3OS1hNzE1LTQ3N2RkZjUyYmZmNSJ9.cujumPHOsV-SKaL1VzlmfGuaGPP1p9fBifPEJm7bWXETEqSOqT-dfoEcK8ZSWSXWOYCMu4TmXRfn0pHUqOB3TnTqs7UoyaMCDphPXTuiP7Okv18Zdus6TZdMo94fKgmZTdgrgYFfrZozxyeibWQZOvy372XvR1LUtZzPD9Ve3hrurV34VWnoqon4dZcmUQgv1cOZ7wnheXPK1vZBsNN9_smyPmM29kPIDehloQBB3FgllH6ryGcXy3uKxH6__MeYpVzi6Dvqi3E5T9fWN47gwwKnq8fPvQaU_fQK8jo5AhDJ61k0hBl0i4-JzQ5XaymFgbwgNdNkdtBayipZqtpIZdQcwIbYzh8NElagLFsxgEaC5lVyXdQ76wDBzHAywvnB-EJ9sUHMeXMM9H62PHffGRedXySpNJSMCHON2oIcgS8R61shg4ejTEaR2wgFxiYPYhRZIEy1ac1SpWoPBYQPb8_TwW0Q7RGgFKSLrFb_uCZP2K8QkhQLZug14u5RMQRCA_PDlmItxLtnu5z-cp2gNJENsaXv14hSnWGDsn8AY4mlVVGyOKndkMBpRP6T9ji9WRS_jpV963Ydl3l2PVglWdoF4ezCtsc5GBC9oqAD9TBjR-jK6aUOO2ik2La2ZhCl38XGjHoMdZAFERBBqj_LAaYGISy1C2_LdKFnzOmcUa0";
 
     public String putReq(String url, Object body){
         try {
@@ -48,7 +48,7 @@ public  class RestTemplateConf {
             HttpHeaders headers = new HttpHeaders();
             headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
             headers.setContentType(MediaType.APPLICATION_JSON);
-            headers.setBearerAuth(this.getBearerToken1());
+            headers.setBearerAuth(this.bearerToken);
             HttpEntity<Object> requestEntity = new HttpEntity<>(body, headers);
             log.info("URL: {}",apiEndpoint);
 
@@ -73,7 +73,7 @@ public  class RestTemplateConf {
             String apiEndpoint = resourceUrl + url;
             HttpHeaders headers = new HttpHeaders();
             headers.add(HttpHeaders.ACCEPT,"*/*");
-            headers.setBearerAuth(this.getBearerToken1());
+            headers.setBearerAuth(this.bearerToken);
             HttpEntity<Object> requestEntity = new HttpEntity<>(headers);
             ResponseEntity<String> response = restTemplate.exchange(apiEndpoint,HttpMethod.GET,requestEntity,String.class);
             log.info("Status: {}",response.getHeaders());
@@ -89,7 +89,7 @@ public  class RestTemplateConf {
 
     }
 
-    @Scheduled(fixedDelay = 1000 * 60 * 60 * 12, initialDelay = 0)
+//    @Scheduled(fixedDelay = 1000 * 60 * 60 * 12, initialDelay = 0)
     public  void getBearerToken(){
         String apiEndpoint = resourceUrl + "/access/token";
         HttpHeaders headers = new HttpHeaders();
