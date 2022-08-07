@@ -48,7 +48,7 @@ public  class RestTemplateConf {
             HttpHeaders headers = new HttpHeaders();
             headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
             headers.setContentType(MediaType.APPLICATION_JSON);
-            headers.setBearerAuth(this.bearerToken);
+            headers.setBearerAuth(this.getBearerToken1());
             HttpEntity<Object> requestEntity = new HttpEntity<>(body, headers);
             log.info("URL: {}",apiEndpoint);
 
@@ -73,7 +73,7 @@ public  class RestTemplateConf {
             String apiEndpoint = resourceUrl + url;
             HttpHeaders headers = new HttpHeaders();
             headers.add(HttpHeaders.ACCEPT,"*/*");
-            headers.setBearerAuth(this.bearerToken);
+            headers.setBearerAuth(this.getBearerToken1());
             HttpEntity<Object> requestEntity = new HttpEntity<>(headers);
             ResponseEntity<String> response = restTemplate.exchange(apiEndpoint,HttpMethod.GET,requestEntity,String.class);
             log.info("Status: {}",response.getHeaders());
@@ -100,5 +100,18 @@ public  class RestTemplateConf {
         log.info("Req headers: {}",requestEntity.getHeaders());
         HttpEntity<String> response= restTemplate.exchange(apiEndpoint, HttpMethod.POST, requestEntity,String.class);
         this.bearerToken =response.getBody();
+    }
+
+
+    public  String getBearerToken1(){
+        String apiEndpoint = resourceUrl + "/access/token";
+        HttpHeaders headers = new HttpHeaders();
+
+        headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+        String body= String.format("username=%s&password=%s",username,password );
+        HttpEntity<Object> requestEntity = new HttpEntity<>(body, headers);
+        log.info("Req headers: {}",requestEntity.getHeaders());
+        HttpEntity<String> response= restTemplate.exchange(apiEndpoint, HttpMethod.POST, requestEntity,String.class);
+        return response.getBody();
     }
 }
