@@ -110,8 +110,13 @@ public  class RestTemplateConf {
         headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
         String body= String.format("username=%s&password=%s",username,password );
         HttpEntity<Object> requestEntity = new HttpEntity<>(body, headers);
-        log.info("Req headers: {}",requestEntity.getHeaders());
-        HttpEntity<String> response= restTemplate.exchange(apiEndpoint, HttpMethod.POST, requestEntity,String.class);
-        return response.getBody();
+//        log.info("Req headers: {}",requestEntity.getHeaders());
+        ResponseEntity<String> response= restTemplate.exchange(apiEndpoint, HttpMethod.POST, requestEntity,String.class);
+        if (response.getStatusCodeValue() == 201){
+            return response.getBody();
+        }else {
+            return  getBearerToken1();
+        }
+
     }
 }
