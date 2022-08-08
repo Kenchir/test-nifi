@@ -116,6 +116,5 @@ public  class RestTemplateConf {
         }else {
             return  getBearerToken1();
         }
-
     }
 }

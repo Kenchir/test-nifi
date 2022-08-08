@@ -124,6 +124,9 @@ public class ListSftp {
         String path = (String) map.get("Remote Path");
         log.info("Path: {}",path);
         map.put("Remote Path",path.replaceAll("/cdrs","#{primary}"));
+        map.put("Hostname","#{host}");
+        map.put("Username","#{username}");
+        map.put("Password","#{password}");
         object.put("properties",map);
         return  object;
     }
@@ -136,7 +139,9 @@ public class ListSftp {
         map.put("Move Destination Directory",path.replaceAll("/backupcdrs","#{secondary}"));
 
         map.put("Remote File","${path}/${filename}");
-
+        map.put("Hostname","#{host}");
+        map.put("Username","#{username}");
+        map.put("Password","#{password}");
         object.put("properties",map);
 
         return  object;
